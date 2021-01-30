@@ -1,7 +1,7 @@
 # -*- Coding: utf-8 -*-
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QFormLayout, QLabel,  QGridLayout
 from .plugins.pyqt5_custom import MessageCustom, InputCustom, ButtonCustom, BoxInfoCustom, TableWidgetCustom, MultipleLayoutWidgetCustom
-from .config import Settings, Routes
+from config import Settings, Routes
 
 class RecordingAppInterface(QWidget):
  
@@ -22,13 +22,13 @@ class RecordingAppInterface(QWidget):
         self.infoGroupBox = BoxInfoCustom(title=".:: Información de grabación ::.")
         self.tableWidget = TableWidgetCustom()
  
-        # Añadir diseño de caja(Box Layout), agregue la tabla al diseño de la caja y agregue el diseño de la caja al widget
+        # BOX - LAYOUT
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.formGroupBox) 
         self.layout.addWidget(self.infoGroupBox) 
         self.layout.addWidget(self.tableWidget) 
         self.setLayout(self.layout) 
-        # Mostrar Widget
+        # MOSTRAR WIDGET
         self.show()
 
     def createForm(self):
@@ -36,13 +36,14 @@ class RecordingAppInterface(QWidget):
 
         self.formGroupBox = QGroupBox("Grabación de audio")
         self.btnRecord = ButtonCustom("Grabar ", styles=Settings.style_btn_info, path_icon=Routes.icon_microphone)
+        self.btnStop = ButtonCustom("Detener ", styles=Settings.style_btn_danger, path_icon=Routes.icon_stop)
         self.btnClean = ButtonCustom(path_icon=Routes.icon_clean, styles=Settings.style_btn_danger)
         self.btnClean.setAction(self.cleanInfoBox)
         self.btnClean.setSize(28, 28)
 
         self.btnActions = ButtonCustom("")
 
-        layout.addRow(MultipleLayoutWidgetCustom(elements=[self.btnRecord, self.btnClean]))
+        layout.addRow(MultipleLayoutWidgetCustom(elements=[self.btnRecord, self.btnStop, self.btnClean]))
 
         self.formGroupBox.setLayout(layout)  
 

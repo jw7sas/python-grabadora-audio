@@ -1,10 +1,12 @@
+# -*- Coding: utf-8 -*-
 import csv
 import os
 
 from .models import Audio
 
 class AudioService():
-
+    """ Clase de servicios para la tabla audio. """
+    
     def __init__(self, table_name):
         self.table_name = table_name
 

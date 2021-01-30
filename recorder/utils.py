@@ -7,7 +7,6 @@ def random_name(name_base):
     filename = "_".join([name_base, suffix])
     return filename
 
-
 def directory_exists(url_path):
     """ Método para verificar existencia de directorio. """
     if path.isdir(url_path):
@@ -28,7 +27,6 @@ def write_file(base_url, filename, content):
         with open(base_url + filename, "wb") as f:
             f.write(content)
             f.close()
-
 
 def remove_file(url_path):
     """ Método para eliminar un archivo. """

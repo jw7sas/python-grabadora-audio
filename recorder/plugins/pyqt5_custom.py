@@ -1,25 +1,10 @@
+# -*- Coding: utf-8 -*-
 from PyQt5.QtWidgets import QWidget, QMessageBox, QLineEdit, QPushButton, QGroupBox, QVBoxLayout, QLabel, QTableWidget, QTableWidgetItem, QGridLayout, QFormLayout, QHBoxLayout, QPlainTextEdit
 from PyQt5.QtCore import pyqtSlot, QRect, QSize, Qt
 from PyQt5.QtGui import QIcon
 
-class MessageCustom(QMessageBox):
-    def __init__(self):
-        QMessageBox.__init__(self)
-        self.setIcon(QMessageBox.Information)
-        self.setWindowTitle("Atención !!")
-        self.setText("")
-        self.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-        # self.buttonClicked.connect(self.msgButtonClick)
-
-    def showMessage(self, text):
-        self.setText(text)
-        self.exec()
-
-    # def msgButtonClick(self, i):
-        # print("Button clicked is:",i.text())
-
-
 class InputCustom(QLineEdit):
+    """ Clase de input personalizado. """
     def __init__(self):
         QLineEdit.__init__(self)
 
@@ -31,15 +16,14 @@ class InputCustom(QLineEdit):
 
 
 class ButtonCustom(QPushButton):
-    def __init__(self, value="", styles="", param=None, path_icon=None):
+    """ Clase de botón o icono personalizado. """
+    def __init__(self, value='', styles='', param=None, path_icon=None):
         QPushButton.__init__(self, value)
         if path_icon:
             self.setIcon(QIcon(path_icon))
             self.setIconSize(QSize(20,20))
 
-        self.setStyleSheet("{styles}".format(
-            styles=styles
-        ))
+        self.setStyleSheet(styles)
         self.param=param
         self.action=None
         self.clicked.connect(self.clickAction)
@@ -57,7 +41,25 @@ class ButtonCustom(QPushButton):
         if action is not None:
             self.action = action
 
+
+class MultipleLayoutWidgetCustom(QWidget):
+    """ Clase para crear una fila a partir de múltiples elementos. """
+    def __init__(self, elements, parent=None):
+        super(MultipleLayoutWidgetCustom, self).__init__(parent)
+
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
+        layout.setSpacing(5)
+
+        # Add elements
+        for element in elements:
+            layout.addWidget(element)
+        
+        self.setLayout(layout)
+
+
 class BoxInfoCustom(QGroupBox):
+    """ Clase con caja de información personalizada. """
     def __init__(self, title):
         QGroupBox.__init__(self, title)
         self.vbox = QVBoxLayout()
@@ -84,22 +86,25 @@ class BoxInfoCustom(QGroupBox):
         self.textInfo.setStyleSheet(self.basic_styles)
 
 
-class MultipleLayoutWidgetCustom(QWidget):
-    def __init__(self, elements, parent=None):
-        super(MultipleLayoutWidgetCustom, self).__init__(parent)
+class MessageCustom(QMessageBox):
+    """ Clase con mensaje de texto personalizado. """
+    def __init__(self, title="Atención !!"):
+        QMessageBox.__init__(self)
+        self.setIcon(QMessageBox.Information)
+        self.setWindowTitle(title)
+        self.setText("")
+        self.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        # self.buttonClicked.connect(self.msgButtonClick)
 
-        layout = QHBoxLayout()
-        layout.setContentsMargins(0,0,0,0)
-        layout.setSpacing(5)
+    def showMessage(self, text):
+        self.setText(text)
+        self.exec()
 
-        # Add elements
-        for element in elements:
-            layout.addWidget(element)
-        
-        self.setLayout(layout)
-
+    # def msgButtonClick(self, i):
+        # print("Button clicked is:",i.text())
 
 class TableWidgetCustom(QTableWidget):
+    """ Clase con tabla personalizada, que recibe información Headers, Data y Acciones. """
     def __init__(self):
         QTableWidget.__init__(self)
         self.headers = []
@@ -145,4 +150,4 @@ class TableWidgetCustom(QTableWidget):
                         self.setCellWidget(i,j, MultipleLayoutWidgetCustom(elements=elements))
 
                 except Exception as e:
-                    print(e)
+                    return e

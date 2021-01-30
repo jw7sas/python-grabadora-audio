@@ -7,32 +7,39 @@ import time
 from .utils import directory_exists, file_exists, random_name, write_file, remove_file
 from .models import Audio
 from .services import AudioService
-from .config import Routes, Settings
-from functools import partial 
+from .plugins.audio_help import AudioHelp
+from config import Settings, Routes 
 
 class Record():
     """ Clase de grabación de audio. """
     def __init__(self, interface):
         self.routes = Routes()
         self.interface = interface
+        self.audio_h = AudioHelp()
         self.listAudios()
+        self.filename = None
 
-    def saveAudio(self, filename, audio, text):
+
+    def saveAudio(self, filename, text):
         """ Método para guardar registro de audios. """
-        # Guardar archivos
-        write_file(
-            self.routes.base_audio_url, filename + ".wav", audio.get_wav_data()
-        )
-        write_file(
-            self.routes.base_text_audio_url, filename + ".txt", text.encode()
-        )
-        # Guardar registros
-        audio = Audio(filename, text[:20])
-        audio_service = AudioService(self.routes.table_name)
-        audio_service.create_audio(audio)
-        # Refrescar vista
-        self.listAudios()
-        self.interface.showMessageInfo("Audio guardado en el sistema.")
+        try:
+            # Guardar archivos
+            write_file(
+                base_url=self.routes.base_text_audio_url,
+                filename=filename + ".txt", 
+                content=text.encode()
+            )
+            # Guardar registros
+            audio = Audio(filename, text[:30])
+            audio_service = AudioService(self.routes.table_name)
+            audio_service.create_audio(audio)
+            # Refrescar vista
+            self.listAudios()
+            self.interface.showMessageInfo("Audio guardado en el sistema.")
+
+        except Exception as e:
+            self.interface.showMessageInfo("Error al guardar los archivos.")
+            return e
 
 
     def listAudios(self):
@@ -71,22 +78,41 @@ class Record():
         return audio[0]
 
 
-    def recordAudio(self):
-        """ Método para grabar audio. """
+    def recordAudio(self, callback):
+        """ Método de grabación de audio. """
         try:
-            # Proceso de grabación
-            record = sr.Recognizer()
-            with sr.Microphone() as resource:
-                audio = record.listen(resource)
-                try:
-                    text = str(record.recognize_google(audio, language=Settings.language))
-                    self.interface.updateInfoBox("Has dicho: \n{}".format(text))
-                    self.saveAudio(filename=random_name("record"), audio=audio, text=text)
-                except Exception as e:
-                    self.interface.showMessageInfo("Lo siento no entendi.")
+            self.filename = random_name("record")
+            url_path = self.routes.base_audio_url + self.filename + ".wav"
+            self.interface.updateInfoBox("Grabando ...")
+            self.audio_h.start_recording(url_path=url_path, callback_refresh=callback, callback_final=self.finalAudio)
+        except Exception as e:
+            self.interface.showMessageInfo("Error de grabación.")
+
+
+    def stopAudio(self):
+        """ Método de grabación de audio. """
+        try:
+            self.audio_h.stop_recording()
         except:
-            self.interface.showMessageInfo("Error de grabación.") 
-            
+            self.interface.showMessageInfo("Error de grabación.")
+        
+
+    def finalAudio(self):
+        """ Método de finalización de grabación. """
+        try:
+            if self.filename is not None:
+                text = self.audio_h.__class__().read_audio(
+                    url_path=self.routes.base_audio_url + self.filename + ".wav",
+                    language=Settings.language    
+                )
+                self.interface.updateInfoBox("Has dicho: \n{}".format(text))
+                self.saveAudio(filename=self.filename, text=text)
+        except:
+            self.interface.showMessageInfo("Error de grabación.")
+        finally:
+            self.filename = None
+
+
 
     def deleteAudio(self, uid):
         """ Método para eliminar audio. """
@@ -94,8 +120,8 @@ class Record():
         audio = self.getAudio(uid)
         if audio:
             audio_service.delete_audio(audio["uid"])
-            remove_file(self.routes.base_audio_url + audio["filename"] + ".wav" )
-            remove_file(self.routes.base_text_audio_url + audio["filename"] + ".txt" )
+            remove_file(self.routes.base_audio_url + audio["filename"] + ".wav")
+            remove_file(self.routes.base_text_audio_url + audio["filename"] + ".txt")
             self.listAudios()
             self.interface.showMessageInfo("Audio eliminado del sistema.") 
         else:
@@ -107,32 +133,10 @@ class Record():
         try:
             audio = self.getAudio(uid)
             if audio:
-                chunk = 1024 
                 audio_url = self.routes.base_audio_url + audio["filename"] + ".wav" 
                 if file_exists(audio_url):
-                    f = wave.open(audio_url, "rb")
-                    # reproducimos audio
-                    #INICIAMOS PyAudio.
-                    p = pyaudio.PyAudio()  
-                    #ABRIMOS STREAM
-                    stream = p.open(
-                        format=p.get_format_from_width(f.getsampwidth()),  
-                        channels=f.getnchannels(),  
-                        rate=f.getframerate(),  
-                        output=True
-                    )
-                    #LEEMOS INFORMACIÓN  
-                    data = f.readframes(chunk)  
-                    #REPRODUCIMOS "stream"  
-                    while data:  
-                        stream.write(data)  
-                        data = f.readframes(chunk)  
-                    #PARAMOS "stream".  
-                    stream.stop_stream()  
-                    stream.close()  
-
-                    #FINALIZAMOS PyAudio  
-                    p.terminate()
+                    audio_h = self.audio_h.__class__(chunk=1024)
+                    audio_h.play_audio(audio_url)
                 else:
                     self.interface.showMessageInfo("Audio no encontrado.")
             else:

@@ -3,13 +3,20 @@ import sys
 from PyQt5.QtWidgets import  QApplication
 from recorder import Record, RecordingAppInterface
 
-class Aplicacion():
+
+class Aplicacion(QApplication):
 	def __init__(self):
-		app = QApplication(sys.argv)
+		QApplication.__init__(self, sys.argv)
 		interface = RecordingAppInterface()
 		record = Record(interface)
+		interface.btnRecord.param = self.refresh_app
 		interface.btnRecord.setAction(record.recordAudio)
-		sys.exit(app.exec_())
+		interface.btnStop.setAction(record.stopAudio)
+		sys.exit(self.exec_())
+
+	def refresh_app(self):
+		self.processEvents()
+
 
 
 def main():

@@ -1,6 +1,9 @@
+# -*- Coding: utf-8 -*-
 import uuid
 
 class Audio:
+    """ Clase Audio. """
+    
     def __init__(self, filename, short_message, uid=None):
         self.filename = filename
         self.short_message = short_message

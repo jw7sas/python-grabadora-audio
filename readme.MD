@@ -20,6 +20,16 @@ https://www.youtube.com/watch?v=dXqWF6okH_o
 http://pythonlcpa.blogspot.com/p/blog-page_1.html
 # formularios
 
+<div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+
 # Página de iconos
 https://www.flaticon.com/
 
+# Crear el archivo ejecutable
+pip install pyinstaller
+pyinstaller app.py
+pyi-makespec app.py  -> si no se crear el archivo
+
+open file app.spec -> en data
+    datas=[], -> agregar rutas de los archivos estaticos
+    
