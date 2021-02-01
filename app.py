@@ -18,7 +18,6 @@ class Aplicacion(QApplication):
 		self.processEvents()
 
 
-
 def main():
 	app = Aplicacion()
 	return 0

@@ -1,10 +1,6 @@
 # -*- Coding: utf-8 -*-
-import speech_recognition as sr
-import pyaudio
-import wave
-import time
 # Utiles
-from .utils import directory_exists, file_exists, random_name, write_file, remove_file
+from .utils import file_exists, random_name, write_file, remove_file
 from .models import Audio
 from .services import AudioService
 from .plugins.audio_help import AudioHelp
@@ -46,7 +42,6 @@ class Record():
         """ Método para listar grabaciones. """
         audio_service = AudioService(self.routes.table_name)
         audios = audio_service.list_audios()
-        i_audios = []
         for audio in audios:
             audio = audio.update(
                 dict(
